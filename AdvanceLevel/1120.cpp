@@ -30,8 +30,8 @@ int main()
 	  {
 		  if(space != 0)
 		    printf(" ");
-	      else
-			space++;  
+	    	  else
+		    space++;  
 		  printf("%d",i);
 	  }
   }
