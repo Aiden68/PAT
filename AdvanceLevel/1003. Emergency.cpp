@@ -1,104 +1,76 @@
-#include"iostream"
+#include<iostream>
 using namespace std;
+const int inf = 99999999;
 
+int visit[550] = { 0 };
+int shortestPath[550];
+int teamNum[550];
+int n, m, c1, c2;
+int team[550] = { 0 };
+int graph[550][550] = { 0 };
+int dist[550] = { 0 };
+void dijkstra()
+{
+	visit[c1] = 1;
+	while(1)
+	{
+		int min = inf;
+		int v = -1;
+		for(int i = 0; i < n; i++)
+		{
+			if(min > dist[i] && visit[i] == 0)
+			{
+				min = dist[i];
+				v = i;
+			}
+		}
+		if(v == -1)
+			break;
+		visit[v] = 1;
+		for(int i = 0; i < n; i++)
+		{
+			if(dist[i] > dist[v] + graph[v][i])
+			{
+				dist[i] = dist[v] + graph[v][i];
+				shortestPath[i] = shortestPath[v];
+				teamNum[i] = teamNum[v] + team[i];
+			}
+			else if(dist[i] == dist[v] + graph[v][i])
+			{
+				shortestPath[i] += shortestPath[v];
+				if(teamNum[i] < teamNum[v] + team[i])
+					teamNum[i] = teamNum[v] + team[i];
+			}
+		}
+	}
+}
 int main()
 {
-	int n, m, c1, c2;
-	cin >> n >> m >> c1 >> c2;
-	int *team = new int[n];
-	int *path = new int[n];
-	int *pathel = new int[n];
-	int *pathcn = new int[n];
-	for (int i = 0; i < n; i++)
+	fill(graph[0], graph[0] + 550 * 550, inf);
+	scanf("%d%d%d%d", &n, &m, &c1, &c2);
+	for(int i = 0; i < n; i++)
 	{
-		cin >> team[i];
-		pathel[i] = 0;
-		pathcn[i] = 0;
+		scanf("%d", &team[i]);
 	}
-	int **g;
-	g = new int *[n];
-	for (int i = 0; i < n; i++)
+	for(int i = 0; i < m; i++)
 	{
-		g[i] = new int[n];
+		int v1, v2, len;
+		scanf("%d%d%d", &v1, &v2, &len);
+		graph[v1][v2] = graph[v2][v1] = len;
 	}
-	for (int i = 0; i < n; i++)
+	for(int i = 0; i < n; i++)
 	{
-		for (int j = 0; j < n; j++)
+		dist[i] = graph[c1][i];
+		if(dist[i] != inf)
 		{
-			if (i == j)
-				g[i][j] = 0;
-			else
-				g[i][j] = 999999;
+			shortestPath[i] = 1;
+			teamNum[i] = team[i] + team[c1];
 		}
 	}
-	for (int i = 0; i < m; i++)
-	{
-		int tempc1, tempc2;
-		int length;
-		cin >> tempc1 >> tempc2 >> length;
-		g[tempc1][tempc2] = length;
-		g[tempc2][tempc1] = length;
-	}
-	pathel[c1] = team[c1];
-	pathcn[c1] = 1;
-	int *dist = new int[n];
-	for (int i = 0; i < n; i++)
-	{
-		dist[i] = g[c1][i];
-		if (dist[i] != 999999)
-		{
-			if (i != c1)
-				pathel[i] = pathel[c1] + team[i];
-			pathcn[i] = pathcn[c1];
-		}
-	}
-	int mt = team[c1] + team[c2];
-	for (int i = 0; i < n; i++)
-	{
-		path[i] = -1;
-	}
-	int s = 0;
-	path[c1] = s++;
-	path[c2] = n-1;
-	int count = 1;
-	while (1)
-	{	
-		int flagc = -1;
-		int tm = 999999;
-		for (int i = 0; i < n; i++)
-		{
-			if (path[i] == -1 && dist[i] < tm)
-			{
-				tm = dist[i];
-				flagc = i;
-			}
-		}
-		if (flagc == -1)
-			break;
-		else
-			path[flagc] = s++;		
-		for (int i = 0; i < n; i++)
-		{
-			if (dist[i] > dist[flagc] + g[flagc][i])
-			{
-				dist[i] = dist[flagc] + g[flagc][i];
-				pathcn[i] = pathcn[flagc];
-				pathel[i] = pathel[flagc] + team[i];
-			}
-			else if (dist[i] == dist[flagc] + g[flagc][i])
-			{
-				if (i != flagc)
-				{
-					pathcn[i] = pathcn[flagc] + pathcn[i];
-					if (pathel[i] < pathel[flagc] + team[i])
-					{
-						pathel[i] = pathel[flagc] + team[i];
-					}
-				}
-				
-			}
-		}	
-	}
-	cout << pathcn[c2]<<" "<<pathel[c2];
+	teamNum[c1] = team[c1];
+	shortestPath[c1] = 1;
+	dist[c1] = 0;
+	dijkstra();
+	printf("%d %d", shortestPath[c2], teamNum[c2]);
 	return 0;
 }
